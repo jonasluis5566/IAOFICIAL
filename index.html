@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8º Ano - Assistente IA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #fafafa; color: #202124; height: 100vh; overflow: hidden; }
+        .header { background: #fff; padding: 15px 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 15px; }
+        .logo { font-size: 22px; font-weight: 500; color: #1a73e8; display: flex; align-items: center; gap: 10px; }
+        .logo i { font-size: 28px; } .fab-btn { width: 45px; height: 45px; background: #1a73e8; color: white; border: none; border-radius: 50%; font-size: 20px; cursor: pointer; } .floating-menu { position: absolute; left: 20px; top: 70px; background: white; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 8px 0; display: none; z-index: 1000; min-width: 200px; } .floating-menu.show { display: block; } .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; color: #5f6368; } .menu-item:hover { background: #f8f9fa; color: #1a73e8; } .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; } .modal.show { display: flex; } .modal-content { background: white; border-radius: 12px; padding: 25px; width: 90%; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto; } .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; } .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #5f6368; } .form-group { margin-bottom: 15px; } .form-control { width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 15px; } .btn-group { display: flex; gap: 10px; margin-top: 20px; } .btn { flex: 1; padding: 10px 20px; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; } .btn-primary { background: #1a73e8; color: white; } .btn-secondary { background: #f1f3f4; color: #5f6368; } .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; } .message { display: flex; gap: 10px; max-width: 85%; } .message.user { align-self: flex-end; flex-direction: row-reverse; } .avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; } .message.user .avatar { background: #1a73e8; color: white; } .message.bot .avatar { background: #f1f3f4; color: #5f6368; } .message-content { background: #f1f3f4; padding: 12px 16px; border-radius: 18px; max-width: 100%; line-height: 1.4; font-size: 15px; } .message.user .message-content { background: #e8f0fe; color: #1967d2; } .input-wrapper { display: flex; align-items: flex-end; gap: 10px; max-width: 800px; margin: 0 auto; padding: 15px 20px; } .input-box { flex: 1; border: 1px solid #e0e0e0; border-radius: 20px; padding: 10px 15px; font-size: 15px; } .upload-btn, .send-btn { width: 40px; height: 40px; border: none; border-radius: 50%; cursor: pointer; } .upload-btn { background: #f1f3f4; color: #5f6368; } .send-btn { background: #1a73e8; color: white; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <button class="fab-btn" onclick="toggleMenu()"><i class="fas fa-plus"></i></button>
+        <div class="floating-menu" id="floatingMenu">
+            <div class="menu-item" onclick="openModal('resumo')"><i class="fas fa-file-alt"></i><span>Criar Resumo</span></div>
+            <div class="menu-item" onclick="openModal('exercicio')"><i class="fas fa-calculator"></i><span>Resolver Exercício</span></div>
+            <div class="menu-item" onclick="openModal('quiz')"><i class="fas fa-trophy"></i><span>Gerar Quiz</span></div>
+            <div class="menu-item" onclick="openModal('video')"><i class="fas fa-play-circle"></i><span>Buscar Vídeo</span></div>
+        </div>
+        <div class="logo"><i class="fas fa-robot"></i>8º Ano - Assistente IA</div>
+    </header>
+
+    <div class="container">
+        <main class="content">
+            <div id="chat" class="chat-container">
+                <div class="message bot"><div class="avatar"><i class="fas fa-robot"></i></div><div class="message-content">Opa seu fracassado! 😏 <br>Não prestou atenção na aula e veio pra mim, né?<br><br>Relaxa, eu te ajudo! Use o botão <b>+</b> ou me conta o que você precisa.</div></div>
+            </div>
+            <div class="input-wrapper">
+                <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                <button class="upload-btn" onclick="document.getElementById('image-upload').click()"><i class="fas fa-camera"></i></button>
+                <textarea class="input-box" id="message-input" placeholder="Digite sua pergunta..." rows="1"></textarea>
+                <button class="send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal" id="resumoModal"><div class="modal-content"><div class="modal-header"><h3>Criar Resumo</h3><button class="close-btn" onclick="closeModal('resumoModal')">&times;</button></div><div class="form-group"><label>Matéria</label><select class="form-control" id="resumoMateria"><option>Matemática</option><option>Física</option><option>Química</option><option>Biologia</option><option>História</option><option>Geografia</option><option>Português</option></select></div><div class="form-group"><label>Tema</label><input type="text" class="form-control" id="resumoTema" placeholder="Ex: Derivadas"></div><div class="form-group"><label>Linhas</label><input type="number" class="form-control" id="resumoLinhas" min="3" max="20" value="5"></div><div class="btn-group"><button class="btn btn-secondary" onclick="closeModal('resumoModal')">Cancelar</button><button class="btn btn-primary" onclick="criarResumo()">Criar</button></div></div></div>
+
+    <div class="modal" id="exercicioModal"><div class="modal-content"><div class="modal-header"><h3>Resolver Exercício</h3><button class="close-btn" onclick="closeModal('exercicioModal')">&times;</button></div><div class="form-group"><label>Matéria</label><select class="form-control" id="exercicioMateria"><option>Matemática</option><option>Física</option><option>Química</option></select></div><div class="form-group"><label>Exercício</label><textarea class="form-control" id="exercicioTexto" rows="3" placeholder="Digite o exercício de cálculo..."></textarea></div><div class="btn-group"><button class="btn btn-secondary" onclick="closeModal('exercicioModal')">Cancelar</button><button class="btn btn-primary" onclick="resolverExercicio()">Resolver</button></div></div></div>
+
+    <div class="modal" id="quizModal"><div class="modal-content"><div class="modal-header"><h3>Gerar Quiz</h3><button class="close-btn" onclick="closeModal('quizModal')">&times;</button></div><div class="form-group"><label>Matéria</label><select class="form-control" id="quizMateria"><option>Matemática</option><option>Física</option><option>Química</option><option>Biologia</option><option>História</option><option>Geografia</option><option>Português</option></select></div><div class="form-group"><label>Tema</label><input type="text" class="form-control" id="quizTema" placeholder="Ex: Derivadas"></div><div class="form-group"><label>Perguntas</label><input type="number" class="form-control" id="quizQtd" min="3" max="10" value="5"></div><div class="btn-group"><button class="btn btn-secondary" onclick="closeModal('quizModal')">Cancelar</button><button class="btn btn-primary" onclick="gerarQuiz()">Gerar</button></div></div></div>
+
+    <div class="modal" id="videoModal"><div class="modal-content"><div class="modal-header"><h3>Buscar Vídeo</h3><button class="close-btn" onclick="closeModal('videoModal')">&times;</button></div><div class="form-group"><label>Matéria</label><select class="form-control" id="videoMateria"><option>Matemática</option><option>Física</option><option>Química</option><option>Biologia</option><option>História</option><option>Geografia</option></select></div><div class="form-group"><label>Tema</label><input type="text" class="form-control" id="videoTema" placeholder="Ex: Derivadas"></div><div class="btn-group"><button class="btn btn-secondary" onclick="closeModal('videoModal')">Cancelar</button><button class="btn btn-primary" onclick="buscarVideo()">Buscar</button></div></div></div>
+
+    <script>
+        const API_KEY = "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";
+        let isProcessing = false;
+
+        function toggleMenu() { document.getElementById('floatingMenu').classList.toggle('show'); }
+        function openModal(modalType) { if (!isProcessing) { toggleMenu(); document.getElementById(modalType + 'Modal').classList.add('show'); } }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('show'); }
+
+        function addMessage(content, isUser = false) {
+            const chatContainer = document.getElementById('chat');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            messageDiv.innerHTML = `<div class="avatar"><i class="fas fa-${isUser ? 'user' : 'robot'}"></i></div><div class="message-content">${content}</div>`;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function sendApiRequest(prompt) {
+            try {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: 'llama3-8b-8192', messages: [{ role: 'user', content: `Responda em português: ${prompt}` }], max_tokens: 1000 })
+                });
+                const data = await response.json();
+                return data.choices[0].message.content;
+            } catch { return 'Erro ao processar. Tente novamente.'; }
+        }
+
+        async function sendMessage() {
+            if (isProcessing) return;
+            const message = document.getElementById('message-input').value.trim();
+            if (!message) return;
+            isProcessing = true; document.querySelector('.send-btn').disabled = true;
+            addMessage(message, true); document.getElementById('message-input').value = '';
+            addMessage('Pensando...', false);
+            const response = await sendApiRequest(message);
+            document.querySelector('#chat').lastChild.remove();
+            addMessage(response);
+            isProcessing = false; document.querySelector('.send-btn').disabled = false;
+        }
+
+        async function criarResumo() {
+            const materia = document.getElementById('resumoMateria').value;
+            const tema = document.getElementById('resumoTema').value;
+            const linhas = document.getElementById('resumoLinhas').value;
+            if (!tema) return alert('Digite o tema');
+            closeModal('resumoModal');
+            addMessage(`Criando resumo sobre ${tema}...`, true);
+            const response = await sendApiRequest(`Crie resumo de ${linhas} linhas sobre ${tema} de ${materia}`);
+            addMessage(response);
+        }
+
+        async function resolverExercicio() {
+            const materia = document.getElementById('exercicioMateria').value;
+            const texto = document.getElementById('exercicioTexto').value;
+            if (!texto) return alert('Digite o exercício');
+            closeModal('exercicioModal');
+            addMessage(`Resolvendo exercício...`, true);
+            const response = await sendApiRequest(`Resolva passo a passo: ${texto} de ${materia}`);
+            addMessage(response);
+        }
+
+        async function gerarQuiz() {
+            const materia = document.getElementById('quizMateria').value;
+            const tema = document.getElementById('quizTema').value;
+            const qtd = document.getElementById('quizQtd').value;
+            if (!tema) return alert('Digite o tema');
+            closeModal('quizModal');
+            const response = await sendApiRequest(`Crie ${qtd} perguntas sobre ${tema} de ${materia}`);
+            addMessage(response);
+        }
+
+        function buscarVideo() {
+            const materia = document.getElementById('videoMateria').value;
+            const tema = document.getElementById('videoTema').value;
+            if (!tema) return alert('Digite o tema');
+            closeModal('videoModal');
+            const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(tema + ' ' + materia)}`;
+            addMessage(`📹 Vídeos: <a href="${url}" target="_blank">${url}</a>`);
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (file && file.size < 5 * 1024 * 1024) {
+                const reader = new FileReader();
+                reader.onload = () => addMessage('<img src="' + reader.result + '" style="max-width:150px;border-radius:8px;">', true);
+                reader.readAsDataURL(file);
+            }
+            e.target.value = '';
+        }
+
+        document.addEventListener('keydown', e => e.key === 'Escape' && document.querySelectorAll('.modal').forEach(m => m.classList.remove('show')));
+        document.addEventListener('click', e => !e.target.closest('.fab-btn') && !e.target.closest('.floating-menu') && document.getElementById('floatingMenu').classList.remove('show'));
+    </script>
+</body>
+</html>
